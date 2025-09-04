@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,13 +29,17 @@ public class MovieService {
         return movieRepository.findAll();
     }
 
-    public List<Category> findCategories(List<Category> categories) {
+    public Optional<Movie> findById(Long id) {
+        return movieRepository.findById(id);
+    }
+
+    private List<Category> findCategories(List<Category> categories) {
         List<Category> categoriesFound = new ArrayList<>();
         categories.forEach(category -> categoryService.findById(category.getId()).ifPresent(categoriesFound::add));
         return categoriesFound;
     }
 
-    public List<Streaming> findStreamings(List<Streaming> streamings) {
+    private List<Streaming> findStreamings(List<Streaming> streamings) {
         List<Streaming> streamingsFound = new ArrayList<>();
         streamings.forEach(streaming -> streamingService.findById(streaming.getId()).ifPresent(streamingsFound::add));
         return streamingsFound;

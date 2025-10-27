@@ -6,12 +6,14 @@ import com.bingebox.controller.request.UserRequest;
 import com.bingebox.controller.response.LoginResponse;
 import com.bingebox.controller.response.UserResponse;
 import com.bingebox.entity.User;
+import com.bingebox.exception.UserNameOrPasswordInvalidException;
 import com.bingebox.mapper.UserMapper;
 import com.bingebox.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,15 +38,19 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
-        UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(request.email(), request.password());
-        Authentication authentication = authenticationManager.authenticate(userAndPass);
+        try {
+            UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(request.email(), request.password());
+            Authentication authentication = authenticationManager.authenticate(userAndPass);
 
-        User user = (User) authentication.getPrincipal();
+            User user = (User) authentication.getPrincipal();
 
-        String token = tokenService.generateToken(user);
+            String token = tokenService.generateToken(user);
 
-        return ResponseEntity.ok(new LoginResponse(token));
-
+            return ResponseEntity.ok(new LoginResponse(token));
+        }
+        catch (BadCredentialsException e) {
+            throw new UserNameOrPasswordInvalidException("User or password invalid!");
+        }
 
     }
 
